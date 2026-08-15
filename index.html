@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Weather App</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: white;
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        button {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            background: #222;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #444;
+        }
+
+        #error {
+            color: white;
+            font-weight: bold;
+            margin: 10px;
+        }
+
+        .weather-card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .city {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .weather-icon {
+            width: 100px;
+            height: 100px;
+        }
+
+        .temperature {
+            font-size: 55px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .condition {
+            font-size: 20px;
+            margin-bottom: 25px;
+        }
+
+        .weather-info {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+        }
+
+        .info-box {
+            background: #f1f1f1;
+            padding: 15px;
+            border-radius: 12px;
+            width: 50%;
+        }
+
+        .info-box .icon {
+            font-size: 25px;
+        }
+
+        .info-box p {
+            color: #555;
+            margin: 5px 0;
+        }
+
+        .info-box strong {
+            font-size: 18px;
+        }
+
+        .updated {
+            margin-top: 20px;
+            color: #666;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+
+<body>
+
+    <div class="container">
+
+        <h1>🌤️ Weather App</h1>
+
+        <p class="subtitle">
+            Check current weather of any city
+        </p>
+
+        <div class="search-box">
+
+            <input 
+                type="text" 
+                id="location"
+                placeholder="Enter city name"
+            >
+
+            <button onclick="getWeather()">
+                Search
+            </button>
+
+        </div>
+
+        <p id="error"></p>
+
+        <div class="weather-card">
+
+            <h2 class="city" id="city">
+                London
+            </h2>
+
+            <img 
+                id="weatherIcon"
+                class="weather-icon"
+                src=""
+                alt="Weather"
+            >
+
+            <div class="temperature">
+                <span id="temperature">--</span>°C
+            </div>
+
+            <div class="condition" id="condition">
+                Loading...
+            </div>
+
+            <div class="weather-info">
+
+                <div class="info-box">
+
+                    <div class="icon">💧</div>
+
+                    <p>Humidity</p>
+
+                    <strong id="humidity">
+                        --%
+                    </strong>
+
+                </div>
+
+                <div class="info-box">
+
+                    <div class="icon">💨</div>
+
+                    <p>Wind</p>
+
+                    <strong id="wind">
+                        -- km/h
+                    </strong>
+
+                </div>
+
+            </div>
+
+            <p class="updated">
+                Last Updated:
+                <span id="updated">
+                    --
+                </span>
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        // Your WeatherAPI key
+        const API_KEY = "99cc2b1a20254d4b959133429261508";
+
+
+        async function getWeather() {
+
+            const location =
+                document.getElementById("location").value.trim();
+
+            const error =
+                document.getElementById("error");
+
+
+            // Check empty input
+            if (location === "") {
+
+                error.textContent =
+                    "Please enter a city name.";
+
+                return;
+            }
+
+
+            error.textContent = "";
+
+
+            // Weather API URL
+            const url =
+                `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${encodeURIComponent(location)}&aqi=yes`;
+
+
+            try {
+
+                // Call API
+                const response =
+                    await fetch(url);
+
+
+                const data =
+                    await response.json();
+
+
+                // Check API error
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error?.message ||
+                        "Weather data not found"
+                    );
+                }
+
+
+                // City name
+                document.getElementById("city").textContent =
+                    data.location.name +
+                    ", " +
+                    data.location.country;
+
+
+                // Temperature
+                document.getElementById("temperature").textContent =
+                    Math.round(data.current.temp_c);
+
+
+                // Weather condition
+                document.getElementById("condition").textContent =
+                    data.current.condition.text;
+
+
+                // Weather icon
+                document.getElementById("weatherIcon").src =
+                    "https:" +
+                    data.current.condition.icon;
+
+
+                // Humidity
+                document.getElementById("humidity").textContent =
+                    data.current.humidity + "%";
+
+
+                // Wind speed
+                document.getElementById("wind").textContent =
+                    data.current.wind_kph +
+                    " km/h";
+
+
+                // Last updated
+                document.getElementById("updated").textContent =
+                    data.current.last_updated;
+
+
+            } catch (err) {
+
+                error.textContent =
+                    "❌ " + err.message;
+
+            }
+
+        }
+
+
+        // Press Enter to search
+        document
+            .getElementById("location")
+            .addEventListener("keypress", function(event) {
+
+                if (event.key === "Enter") {
+
+                    getWeather();
+
+                }
+
+            });
+
+
+        // Load London weather automatically
+        window.onload = function() {
+
+            document.getElementById("location").value =
+                "London";
+
+            getWeather();
+
+        };
+
+    </script>
+
+</body>
+</html>
